@@ -18,12 +18,13 @@ import (
 type JobType string
 
 const (
-	JobSearch          JobType = "search"
-	JobIndex           JobType = "index"
-	JobMsa             JobType = "msa"
-	JobPair            JobType = "pair"
-	JobStructureSearch JobType = "structuresearch"
-	JobComplexSearch   JobType = "complexsearch"
+	JobSearch           JobType = "search"
+	JobIndex            JobType = "index"
+	JobMsa              JobType = "msa"
+	JobPair             JobType = "pair"
+	JobStructureSearch  JobType = "structuresearch"
+	JobComplexSearch    JobType = "complexsearch"
+	JobMetabuliClassify JobType = "metabuliclassify"
 )
 
 type JobRequest struct {
@@ -88,6 +89,13 @@ func (m *JobRequest) UnmarshalJSON(b []byte) error {
 		}
 		(*m).Job = j
 		return nil
+	case JobMetabuliClassify:
+		var j MetabuliClassifyJob
+		if err := json.Unmarshal(msg, &j); err != nil {
+			return err
+		}
+		(*m).Job = j
+		return nil
 	}
 
 	return errors.New("invalid job type")
@@ -121,6 +129,8 @@ func (m *JobRequest) WriteSupportFiles(base string) error {
 		}
 		return errors.New("invalid job type")
 	case JobIndex:
+		return nil
+	case JobMetabuliClassify:
 		return nil
 	}
 	return nil

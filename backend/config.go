@@ -168,6 +168,7 @@ type ConfigPaths struct {
 	Temporary string                `json:"temporary"`
 	Mmseqs    string                `json:"mmseqs"`
 	FoldSeek  string                `json:"foldseek"`
+	Metabuli  string                `json:"metabuli"`
 	ColabFold *ConfigColabFoldPaths `json:"colabfold"`
 }
 
@@ -235,10 +236,11 @@ const (
 	AppFoldSeek       ConfigApp = "foldseek"
 	AppColabFold      ConfigApp = "colabfold"
 	AppPredictProtein ConfigApp = "predictprotein"
+	AppMetabuli       ConfigApp = "metabuli"
 )
 
 type ConfigRoot struct {
-	App     ConfigApp    `json:"app" validate:"oneof=mmseqs foldseek colabfold predictprotein"`
+	App     ConfigApp    `json:"app" validate:"oneof=mmseqs foldseek colabfold predictprotein metabuli"`
 	Server  ConfigServer `json:"server" validate:"required"`
 	Worker  ConfigWorker `json:"worker"`
 	Paths   ConfigPaths  `json:"paths" validate:"required"`
@@ -313,6 +315,10 @@ func (c *ConfigRoot) CheckPaths() error {
 	if c.App == AppFoldSeek {
 		if _, err := os.Stat(c.Paths.FoldSeek); err != nil {
 			return errors.New("FoldSeek binary was not found at " + c.Paths.FoldSeek)
+		}
+	} else if c.App == AppMetabuli {
+		if _, err := os.Stat(c.Paths.Metabuli); err != nil {
+			return errors.New("Metabuli binary was not found at " + c.Paths.Metabuli)
 		}
 	} else if _, err := os.Stat(c.Paths.Mmseqs); err != nil {
 		return errors.New("MMseqs2 binary was not found at " + c.Paths.Mmseqs)

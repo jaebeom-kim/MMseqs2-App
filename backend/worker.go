@@ -1143,6 +1143,60 @@ rm -rf -- "${BASE}/tmp"
 			return &JobExecutionError{err}
 		}
 		return nil
+	case MetabuliClassifyJob:
+		resultBase := filepath.Join(config.Paths.Results, string(request.Id))
+		var wg sync.WaitGroup
+		errChan := make(chan error, len(job.Database))
+		maxParallel := config.Worker.ParallelDatabases
+		semaphore := make(chan struct{}, max(1, maxParallel))
+
+		for index, database := range job.Database {
+			wg.Add(1)
+			semaphore <- struct{}{}
+			go func(index int, database string) {
+				defer wg.Done()
+				defer func() { <-semaphore }()
+				parameters := []string{
+					config.Paths.Metabuli,
+					"classify",
+					job.Query,
+					job.Query2,
+					job.Database[0],
+					job.Outdir,
+					job.Jobid,
+				}
+				cmd, done, err := execCommand(config.Verbose, parameters...)
+				if err != nil {
+					errChan <- &JobExecutionError{err}
+					return
+				}
+				select {
+				case <-time.After(1 * time.Hour):
+					if err := KillCommand(cmd); err != nil {
+						log.Printf("Failed to kill: %s\n", err)
+					}
+					errChan <- &JobTimeoutError{}
+				case err := <-done:
+					if err != nil {
+						errChan <- &JobExecutionError{err}
+					} else {
+						errChan <- nil
+					}
+				}
+			}(index, database)
+		}
+		wg.Wait()
+		close(errChan)
+
+		for err := range errChan {
+			if err != nil {
+				return &JobExecutionError{err}
+			}
+		}
+		if config.Verbose {
+			log.Print("Process finished gracefully without error")
+		}
+		return nil
 	default:
 		return &JobInvalidError{}
 	}

@@ -266,7 +266,23 @@ func server(jobsystem JobSystem, config ConfigRoot) {
 		var email string
 		var taxfilter string
 
-		if strings.HasPrefix(req.Header.Get("Content-Type"), "multipart/form-data") {
+		// Metabuli
+		var query2 string
+		var jobid string
+		var outdir string
+
+		if config.App == AppMetabuli {
+			err := req.ParseMultipartForm(int64(128 * 1024 * 1024))
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			query = req.FormValue("q1")
+			query2 = req.FormValue("q2")
+			outdir = req.FormValue("outdir")
+			jobid = req.FormValue("jobid")
+			dbs = req.Form["database[]"]
+		} else if strings.HasPrefix(req.Header.Get("Content-Type"), "multipart/form-data") {
 			err := req.ParseMultipartForm(int64(128 * 1024 * 1024))
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
@@ -317,6 +333,8 @@ func server(jobsystem JobSystem, config ConfigRoot) {
 			} else {
 				request, err = NewStructureSearchJobRequest(query, dbs, databases, mode, config.Paths.Results, email, taxfilter)
 			}
+		} else if config.App == AppMetabuli {
+			request, err = NewMetabuliClassifyJobRequest(query, query2, dbs, outdir, jobid, databases, mode, config.Paths.Results, email)
 		} else {
 			http.Error(w, "Job type not supported by this server", http.StatusBadRequest)
 			return
@@ -477,7 +495,7 @@ func server(jobsystem JobSystem, config ConfigRoot) {
 		}
 
 		allowlistedCIDRs := parseCIDRs(config.Server.RateLimit.AllowList)
-		if config.App == AppMMseqs2 || config.App == AppFoldSeek {
+		if config.App == AppMMseqs2 || config.App == AppFoldSeek || config.App == AppMetabuli {
 			r.Handle("/ticket", ratelimitWithAllowlistHandler(allowlistedCIDRs, lmt, ticketHandlerFunc)).Methods("POST")
 		}
 		if config.App == AppColabFold || config.App == AppPredictProtein {
@@ -487,7 +505,7 @@ func server(jobsystem JobSystem, config ConfigRoot) {
 			r.Handle("/ticket/pair", ratelimitWithAllowlistHandler(allowlistedCIDRs, lmt, ticketPairHandlerFunc)).Methods("POST")
 		}
 	} else {
-		if config.App == AppMMseqs2 || config.App == AppFoldSeek {
+		if config.App == AppMMseqs2 || config.App == AppFoldSeek || config.App == AppMetabuli {
 			r.HandleFunc("/ticket", ticketHandlerFunc).Methods("POST")
 		}
 		if config.App == AppColabFold || config.App == AppPredictProtein {
