@@ -1144,7 +1144,7 @@ rm -rf -- "${BASE}/tmp"
 		}
 		return nil
 	case MetabuliClassifyJob:
-		resultBase := filepath.Join(config.Paths.Results, string(request.Id))
+		// resultBase := filepath.Join(config.Paths.Results, string(request.Id))
 		var wg sync.WaitGroup
 		errChan := make(chan error, len(job.Database))
 		maxParallel := config.Worker.ParallelDatabases
