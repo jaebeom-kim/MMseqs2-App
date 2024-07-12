@@ -17,6 +17,7 @@ type MetabuliClassifyJob struct {
 	Query2   string   `json:"q2"`
 	Outdir   string   `json:"outdir"`
 	Jobid    string   `json:"jobid"`
+	Maxram   string   `json:"maxram"`
 }
 
 func (r MetabuliClassifyJob) Hash() Id {
@@ -56,6 +57,7 @@ func NewMetabuliClassifyJobRequest(
 	validDbs []Params,
 	mode string,
 	resultPath string,
+	maxram string,
 	email string) (JobRequest, error) {
 
 	job := MetabuliClassifyJob{
@@ -66,6 +68,7 @@ func NewMetabuliClassifyJobRequest(
 		query2,
 		outdir,
 		jobid,
+		maxram,
 	}
 
 	request := JobRequest{

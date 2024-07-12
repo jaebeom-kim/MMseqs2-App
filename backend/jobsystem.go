@@ -531,12 +531,10 @@ func (j *LocalJobSystem) NewJob(request JobRequest, jobsbase string, allowResubm
 	if err != nil {
 		return Ticket{id, StatusError}, err
 	}
-
 	validate := validator.New()
 	if err := validate.Struct(request); err != nil {
 		return Ticket{id, StatusError}, err
 	}
-
 	workdir := filepath.Join(jobsbase, string(id))
 
 	switch res {
@@ -554,7 +552,6 @@ func (j *LocalJobSystem) NewJob(request JobRequest, jobsbase string, allowResubm
 	}
 
 	t := Ticket{id, StatusUnknown}
-
 	if _, err := os.Stat(workdir); os.IsNotExist(err) {
 		err = os.Mkdir(workdir, 0755)
 		if err != nil {

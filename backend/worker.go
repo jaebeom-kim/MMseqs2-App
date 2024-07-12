@@ -1164,6 +1164,8 @@ rm -rf -- "${BASE}/tmp"
 					job.Database[0],
 					job.Outdir,
 					job.Jobid,
+					"--max-ram",
+					job.Maxram,
 				}
 				cmd, done, err := execCommand(config.Verbose, parameters...)
 				if err != nil {
@@ -1233,21 +1235,16 @@ func worker(jobsystem JobSystem, config ConfigRoot) {
 			time.Sleep(100 * time.Millisecond)
 			continue
 		}
-
 		if ticket == nil && err == nil {
-			time.Sleep(100 * time.Millisecond)
 			continue
 		}
-
 		jobFile := filepath.Join(config.Paths.Results, string(ticket.Id), "job.json")
-
 		f, err := os.Open(jobFile)
 		if err != nil {
 			jobsystem.SetStatus(ticket.Id, StatusError)
 			log.Print(err)
 			continue
 		}
-
 		var job JobRequest
 		dec := json.NewDecoder(bufio.NewReader(f))
 		err = dec.Decode(&job)

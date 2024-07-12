@@ -270,6 +270,7 @@ func server(jobsystem JobSystem, config ConfigRoot) {
 		var query2 string
 		var jobid string
 		var outdir string
+		var maxram string
 
 		if config.App == AppMetabuli {
 			err := req.ParseMultipartForm(int64(128 * 1024 * 1024))
@@ -282,6 +283,7 @@ func server(jobsystem JobSystem, config ConfigRoot) {
 			outdir = req.FormValue("outdir")
 			jobid = req.FormValue("jobid")
 			dbs = req.Form["database[]"]
+			maxram = req.FormValue("maxram")
 		} else if strings.HasPrefix(req.Header.Get("Content-Type"), "multipart/form-data") {
 			err := req.ParseMultipartForm(int64(128 * 1024 * 1024))
 			if err != nil {
@@ -334,7 +336,7 @@ func server(jobsystem JobSystem, config ConfigRoot) {
 				request, err = NewStructureSearchJobRequest(query, dbs, databases, mode, config.Paths.Results, email, taxfilter)
 			}
 		} else if config.App == AppMetabuli {
-			request, err = NewMetabuliClassifyJobRequest(query, query2, dbs, outdir, jobid, databases, mode, config.Paths.Results, email)
+			request, err = NewMetabuliClassifyJobRequest(query, query2, dbs, outdir, jobid, databases, mode, config.Paths.Results, email, maxram)
 		} else {
 			http.Error(w, "Job type not supported by this server", http.StatusBadRequest)
 			return

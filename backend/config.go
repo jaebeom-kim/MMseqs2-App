@@ -13,8 +13,8 @@ import (
 )
 
 var defaultFileContent = []byte(`{
-	// One of: mmseqs,foldseek,colabfold,predictprotein
-	"app": "mmseqs",
+	// One of: mmseqs,foldseek,colabfold,predictprotein,metabuli
+	"app": "metabuli",
     // should mmseqs und webserver output be printed
     "verbose": true,
     "server" : {
@@ -77,7 +77,9 @@ var defaultFileContent = []byte(`{
         // path to foldseek binary
         "foldseek"     : "~foldseek",
         // path to mmseqs binary
-        "mmseqs"       : "~mmseqs"
+        "mmseqs"       : "~mmseqs",
+		// path to metabuli binary
+		"metabuli"     : "/Users/jaebeom/MMseqs2-App/backend/metabuli/bin/metabuli"
     },
     // connection details for redis database, not used in -local mode
     "redis" : {
